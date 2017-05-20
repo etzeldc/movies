@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="http://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <script>
+        // Setting two arrays as global variables to hold movies and checkouts
+        var movies = [];
+        var checkouts = [];
+        
+        // Counts through the checkout data to monitor instances of user checkouts
+        function modeCust(checkouts) { 
+            var count = {};
+            var maxcount = 1;
+            var maxUser = [];
+            for (var i = 0; i < checkouts.length; i++) { 
+                if (count[checkouts[i][0]] === undefined) { // If the user (denoted by [0]) associated with the current checkout is absent from the count object...
+                    count[checkouts[i][0]] = 0; // the user count associated with that checkout is set to zero.
+                }
+                count[checkouts[i][0]] += 1; // but if it is present, incriment by one.
+            }
+            // Determines which user count is highest
+            for (var userId in count) { // For every instance of a userId in the count object...
+                if (count[userId] >= maxcount) { // check that that user's count is higher or equal to the current max count.
+                    maxcount = count[userId]; // If so, set the max count to the amount of that user's checkouts,
+                    maxUser.push(userId); // and push the user(s) with the highest amount of checkout occurrences into the array.
+                }
+            }
+            return maxUser;
+        }
+
+        // Counts through the checkouts to determine busiest month
+        function modeMonth(checkouts) {
+            var count = {};
+            var maxcount = 1;
+            var maxMonth = checkouts[0][1];
+            for (i = 0; i < checkouts.length; i++) {
+                if (count[checkouts[i][1]] === undefined) { // If the month (denoted by [1]) associated with the current checkout is absent from the count object...
+                    count[checkouts[i][1]] = 0; // the month count associated with that checkout is set to zero. 
+                }
+                count[checkouts[i][1]] += 1; // but if it is present, incriment by one.
+            }
+            // Determines the month count thats highest
+            for (var month in count) { // For every instance of a month in the count object...
+                if (count[month] > maxcount) { // check that that month's count us higher than or equal to the current max count.
+                    maxcount = count[month]; // If so, set the max count to the amount of that month's checkouts,
+                    maxMonth = month; // and set the max month to that month.
+                }
+            }
+            return maxMonth;
+        }
+
+        // Counts through the checkouts to determine the most popular movie
+        function modeTitle(checkouts, movies) {  
+            var count = {};
+            var maxcount = 1;
+            var maxTitle = checkouts[0][2];
+            var movieTitle = [];
+            for (var i = 0; i < checkouts.length; i++) {
+                if (count[checkouts[i][2]] === undefined) { // If the movie title (denoted by [2]) associated with the current checkout is absent from the count object...
+                    count[checkouts[i][2]] = 0; // the movie title count associated with that checkout is set to zero. 
+                }
+                count[checkouts[i][2]] += 1; // but if it is present, incriment by one.
+            }
+            // Determines the movie title count thats highest
+            for (var title in count) { // For every instance of a movie title in the count object...
+                if (count[title] > maxcount) { // check that that movie title's count us higher than or equal to the current max count.
+                    maxcount = count[title]; // If so, set the max count to the amount of that movie title's checkouts,
+                    maxTitle = title; // and set the max month to that month.
+                }
+            }
+            // Counts through the movies to match the most popular movie's ID to its title
+            for (var i = 0; i < movies.length; i++) {
+                if (movies[i][0] === maxTitle) { // If a movie title's id (denoted by [0]) associated with the current movie matches the most popular movie's id...
+                movieTitle.push(movies[i].splice(1,3).join(' ')); // push the array of that movie's information as a string of just the movie's title.
+                }
+            }
+            return movieTitle;
+        }
+        
+        $(document).ready(function() { 
+            $.get('http://159.203.175.239:9001/checkouts.txt', function(checkoutData) { // Pulls the checkout info,
+                    checkoutData = checkoutData.split('\n'); // formats as an array of each line, 
+                    for (var i = 0; i < checkoutData.length; i++) { // counts through each line,
+                        checkouts.push(checkoutData[i].split(' ')); // and pushes it as an array of each word therein.
+                    }
+                    console.log(modeCust(checkouts));
+                    console.log(modeMonth(checkouts));
+            // pulls the movie information 
+                    $.get('http://159.203.175.239:9001/movies.txt', function(movieData) { // Pulls the movie info,
+                        movieData = movieData.split('\n'); // formats as an array of each line,
+                        for (var i = 0; i < movieData.length; i++) { // counts through each line,
+                        movies.push(movieData[i].split(' ')); // and pushes it as an array of each word therein.
+                    }
+                        console.log(modeTitle(checkouts, movies));
+                    });
+            });
+        });
+	</script>
+</body>
+</html>
